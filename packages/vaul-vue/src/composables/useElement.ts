@@ -1,35 +1,28 @@
-import type { MaybeRefOrGetter } from 'vue'
-import { nextTick, shallowRef, toValue, watchPostEffect } from 'vue'
+import type { ComponentPublicInstance, MaybeRefOrGetter } from 'vue'
+import { unrefElement, useElementSize } from '@vueuse/core'
+import {  shallowRef, watch } from 'vue'
 
-export function useElements(query: string, isMounted: MaybeRefOrGetter<boolean>) {
-  const elements = shallowRef<HTMLElement[]>([])
+export function useElement(target: MaybeRefOrGetter<ComponentPublicInstance | undefined>) {
+  const element = shallowRef<HTMLElement | SVGElement>()
 
-  watchPostEffect(async () => {
-    if (!toValue(isMounted))
-      return
+  const {
+    height,
+    width,
+  } = useElementSize(element)
 
-    await nextTick()
-    const _elements = document.querySelectorAll(query)
+  watch(
+    () => unrefElement(target),
+    (el) => {
+      if (!el)
+        return
 
-    for (let index = 0; index < _elements.length; index++) {
-      const element = _elements[index] as HTMLElement
-      elements.value.push(element)
+      element.value = el
     }
-  })
-
-  const anyContains = (element: HTMLElement | null) => {
-    if (!element)
-      return
-
-    if (element.matches(query)) {
-      return true
-    }
-
-    return elements.value.findIndex(container => container.contains(element)) !== -1
-  }
+  )
 
   return {
-    elements,
-    anyContains,
+    height,
+    width,
+    element,
   }
 }

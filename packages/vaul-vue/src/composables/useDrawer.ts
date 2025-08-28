@@ -4,8 +4,8 @@ import type { DrawerRootEmits, DrawerRootProps } from '../types/drawer'
 import { useWindowSize } from '@vueuse/core'
 import { computed, nextTick, ref, shallowRef, toValue, watch } from 'vue'
 import { dampen } from '../utils'
-import { useEl } from './useEl'
-import { useElements } from './useElement'
+import { useElement } from './useElement'
+import { useQuerySelector } from './useQuerySelector'
 import { useScroll } from './useScroll'
 import { useSnapPoints } from './useSnapPoints'
 import { useStacks } from './useStacks'
@@ -46,14 +46,14 @@ export function useDrawer(
     height: contentHeight,
     width: contentWidth,
     element: contentElement,
-  } = useEl(drawerContentRef)
+  } = useElement(drawerContentRef)
 
   const {
     width: windowWidth,
     height: windowHeight,
   } = useWindowSize()
 
-  const { anyContains: anyNoDragContains } = useElements('[data-vaul-no-drag]', shouldMount)
+  const { anyContains: anyNoDragContains } = useQuerySelector('[data-vaul-no-drag]', shouldMount)
 
   const side = computed(() => props.side)
 
@@ -199,6 +199,7 @@ export function useDrawer(
 
       emit('open')
       await nextTick()
+
 
       if (contentElement.value) {
         addStack(contentElement.value)

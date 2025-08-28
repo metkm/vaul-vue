@@ -2,9 +2,9 @@ import type { ComponentPublicInstance, MaybeRefOrGetter } from 'vue'
 import type { DrawerSide } from '../types/drawer'
 import { onMounted, shallowRef, toValue, watch } from 'vue'
 import { range } from '../utils'
-import { useEl } from './useEl'
+import { useElement } from './useElement'
 
-const drawerStack = shallowRef<HTMLElement[]>([])
+const drawerStack = shallowRef<(HTMLElement | SVGElement)[]>([])
 
 export function useStacks(
   overlayRef: MaybeRefOrGetter<ComponentPublicInstance | undefined>,
@@ -12,9 +12,9 @@ export function useStacks(
   inProgress: MaybeRefOrGetter<boolean>,
   windowSize: MaybeRefOrGetter<number>,
 ) {
-  const drawerWrapperRef = shallowRef<HTMLElement>()
+  const drawerWrapperRef = shallowRef<HTMLElement | SVGElement>()
 
-  const { element: overlayElement } = useEl(overlayRef)
+  const { element: overlayElement } = useElement(overlayRef)
 
   const updateDrawerOffsets = () => {
     const drawerCounts = {
@@ -91,7 +91,7 @@ export function useStacks(
     }
   }
 
-  const addStack = (element: HTMLElement) => {
+  const addStack = (element: HTMLElement | SVGElement) => {
     drawerStack.value.push(element)
     updateDrawerOffsets()
   }
