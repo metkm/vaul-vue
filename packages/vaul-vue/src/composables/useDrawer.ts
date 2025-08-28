@@ -1,7 +1,7 @@
 import type { ComponentPublicInstance, EmitFn, MaybeRefOrGetter, ModelRef, StyleValue } from 'vue'
 import type { DrawerRootEmits, DrawerRootProps } from '../types/drawer'
 
-import { useWindowSize } from '@vueuse/core'
+import { useEventListener, useWindowSize } from '@vueuse/core'
 import { computed, nextTick, ref, shallowRef, toValue, watch } from 'vue'
 import { dampen } from '../utils'
 import { useElement } from './useElement'
@@ -94,16 +94,34 @@ export function useDrawer(
     modelValueSnapIndex,
   })
 
+  useEventListener(contentElement, 'transitionend', async (event) => {
+    const target = event.target as Element | null
+
+    if (!target || target !== contentElement.value)
+      return
+
+    if (modelValueOpen.value) {
+      emit('opened')
+    }
+    else {
+      shouldMount.value = false
+      emit('closed')
+    }
+
+    inProgress.value = false
+  }, { capture: false })
+
   const offsetInitial = computed(
     () => {
       const closeOffset = windowSize.value * sideOffsetModifier.value
+      inProgress.value = true
 
       if (modelValueOpen.value && !animateIn.value) {
         return closeOffset
       }
 
       if (modelValueOpen.value && animateIn.value) {
-        return (currentSnapOffset.value ?? 0) * sideOffsetModifier.value
+        return currentSnapOffset.value * sideOffsetModifier.value
       }
 
       return closeOffset
@@ -215,18 +233,6 @@ export function useDrawer(
     }
 
     inProgress.value = true
-
-    contentElement.value?.addEventListener('transitionend', () => {
-      if (modelValueOpen.value) {
-        emit('opened')
-      }
-      else {
-        shouldMount.value = false
-        emit('closed')
-      }
-
-      inProgress.value = false
-    }, { once: true })
   })
 
   watch(inProgress, () => {

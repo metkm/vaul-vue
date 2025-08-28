@@ -73,7 +73,7 @@ export function useSnapPoints({
 
     if (point === undefined) {
       console.error('Snap point not found')
-      return
+      return 0
     }
 
     const wSize = toValue(windowSize)
