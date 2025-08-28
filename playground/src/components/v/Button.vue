@@ -9,7 +9,7 @@ const props = defineProps<{
 <template>
   <component
     :is="props.to ? RouterLink : 'button'"
-    class="flex bg-neutral-100 hover:bg-neutral-200 text-sm transition-colors font-medium px-4 py-2 rounded-lg shrink-0"
+    class="flex justify-center bg-neutral-100 hover:bg-neutral-200 text-sm transition-colors font-medium px-4 py-2 rounded-lg shrink-0"
     :to="props.to"
   >
     <slot />
