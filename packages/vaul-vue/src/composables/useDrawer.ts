@@ -38,6 +38,10 @@ export function useDrawer(
   const isDragging = ref(false)
   const isPressing = ref(false)
 
+  // this is true when the sheet is in animation,
+  // closing or opening don't matter
+  const inProgress = ref(false)
+
   const {
     height: contentHeight,
     width: contentWidth,
@@ -68,7 +72,7 @@ export function useDrawer(
     addStack,
     popStack,
     updateDepths,
-  } = useStacks(drawerOverlayRef, isDragging, windowSize)
+  } = useStacks(drawerOverlayRef, isDragging, inProgress, windowSize)
 
   const {
     handleScroll,
@@ -111,7 +115,11 @@ export function useDrawer(
       translate: isVertical.value
         ? `0px calc(${offsetInitial.value}px + var(--vaul-inset) * ${-sideOffsetModifier.value})`
         : ` calc(${offsetInitial.value}px + var(--vaul-inset) * ${-sideOffsetModifier.value}) 0px`,
-      transitionProperty: !isPressing.value ? 'translate, transform' : 'none',
+
+      transitionProperty: !isPressing.value && inProgress.value
+        ? 'translate, transform'
+        : 'none',
+
       userSelect: isPressing.value ? 'none' : 'auto',
       touchAction: 'none',
     } satisfies StyleValue
@@ -169,7 +177,7 @@ export function useDrawer(
 
     updateDepths(offsetInitial.value)
   }, {
-    flush: 'post'
+    flush: 'post',
   })
 
   watch(offset, () => {
@@ -205,14 +213,25 @@ export function useDrawer(
       popStack()
     }
 
+    inProgress.value = true
+
     contentElement.value?.addEventListener('transitionend', () => {
       if (modelValueOpen.value) {
         emit('opened')
-      } else {
+      }
+      else {
         shouldMount.value = false
         emit('closed')
       }
+
+      inProgress.value = false
     }, { once: true })
+  })
+
+  watch(inProgress, () => {
+    if (contentElement.value) {
+      contentElement.value.style.transitionDuration = ''
+    }
   })
 
   return {

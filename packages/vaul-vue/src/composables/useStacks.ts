@@ -1,6 +1,6 @@
 import type { ComponentPublicInstance, MaybeRefOrGetter } from 'vue'
 import type { DrawerSide } from '../types/drawer'
-import { onMounted, shallowRef, toValue } from 'vue'
+import { onMounted, shallowRef, toValue, watch } from 'vue'
 import { range } from '../utils'
 import { useEl } from './useEl'
 
@@ -9,6 +9,7 @@ const drawerStack = shallowRef<HTMLElement[]>([])
 export function useStacks(
   overlayRef: MaybeRefOrGetter<ComponentPublicInstance | undefined>,
   isDragging: MaybeRefOrGetter<boolean>,
+  inProgress: MaybeRefOrGetter<boolean>,
   windowSize: MaybeRefOrGetter<number>,
 ) {
   const drawerWrapperRef = shallowRef<HTMLElement>()
@@ -74,7 +75,7 @@ export function useStacks(
     }
 
     let cssText = ''
-    if (!toValue(isDragging)) {
+    if (!toValue(isDragging) && toValue(inProgress)) {
       cssText += `
         transition-easing-function: var(--vaul-easing);
         transition-duration: var(--vaul-duration);
@@ -102,6 +103,12 @@ export function useStacks(
 
   onMounted(() => {
     drawerWrapperRef.value = document.querySelector('[data-vaul-drawer-wrapper]') as HTMLElement | undefined
+  })
+
+  watch(() => toValue(inProgress), () => {
+    if (drawerWrapperRef.value) {
+      drawerWrapperRef.value.style.transitionDuration = ''
+    }
   })
 
   return {
