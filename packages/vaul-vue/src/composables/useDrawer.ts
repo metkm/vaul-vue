@@ -109,12 +109,11 @@ export function useDrawer(
     }
 
     inProgress.value = false
-  }, { capture: false })
+  })
 
   const offsetInitial = computed(
     () => {
       const closeOffset = windowSize.value * sideOffsetModifier.value
-      inProgress.value = true
 
       if (modelValueOpen.value && !animateIn.value) {
         return closeOffset
@@ -136,6 +135,10 @@ export function useDrawer(
 
       transitionProperty: !isPressing.value && inProgress.value
         ? 'translate, transform'
+        : 'none',
+
+      transitionDuration: !isPressing.value && inProgress.value
+        ? 'var(--vaul-duration)'
         : 'none',
 
       userSelect: isPressing.value ? 'none' : 'auto',
@@ -179,7 +182,12 @@ export function useDrawer(
 
   const onDragEnd = () => {
     isPressing.value = false
+
+    if (!isDragging.value)
+      return
+
     isDragging.value = false
+    inProgress.value = true
 
     if (props.dismissible && shouldDismiss.value) {
       modelValueOpen.value = false

@@ -1,5 +1,5 @@
 [data-vaul-drawer] {
-  transition-duration: var(--vaul-duration);
+  /* transition-duration: var(--vaul-duration); */
   transition-timing-function: var(--vaul-easing);
   position: fixed;
 }

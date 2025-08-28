@@ -1,8 +1,9 @@
 import type { ComponentPublicInstance, MaybeRefOrGetter } from 'vue'
 import type { DrawerSide } from '../types/drawer'
-import { onMounted, shallowRef, toValue, watch } from 'vue'
+import { computed, shallowRef, toValue, watch } from 'vue'
 import { range } from '../utils'
 import { useElement } from './useElement'
+import { useQuerySelector } from './useQuerySelector'
 
 const drawerStack = shallowRef<(HTMLElement | SVGElement)[]>([])
 
@@ -12,11 +13,15 @@ export function useStacks(
   inProgress: MaybeRefOrGetter<boolean>,
   windowSize: MaybeRefOrGetter<number>,
 ) {
-  const drawerWrapperRef = shallowRef<HTMLElement | SVGElement>()
-
   const { element: overlayElement } = useElement(overlayRef)
+  const { elements: wrapperElements } = useQuerySelector('[data-vaul-drawer-wrapper]')
+
+  const drawerWrapperRef = computed(() => wrapperElements.value[0] as HTMLElement | undefined)
 
   const updateDrawerOffsets = () => {
+    if (drawerStack.value.length < 1)
+      return
+
     const drawerCounts = {
       top: 0,
       bottom: 0,
@@ -29,7 +34,7 @@ export function useStacks(
 
       const side = element.getAttribute('data-vaul-drawer-side') as DrawerSide | undefined
       if (!side)
-        return
+        continue
 
       drawerCounts[side] += 1
     }
@@ -46,12 +51,19 @@ export function useStacks(
 
       const side = element.getAttribute('data-vaul-drawer-side') as DrawerSide | undefined
       if (!side)
-        return
+        continue
 
       const diff = drawerCounts[side] - offsets[side] - 1
       const yOff = diff * 20 * (side === 'right' || side === 'bottom' ? -1 : 1)
 
       element.style.transform = `scale(${1 - (diff * 0.05)}) translate3d(0px, ${yOff}px, 0px)`
+      element.style.transitionDuration = 'var(--vaul-duration)'
+      element.style.transitionProperty = 'transform'
+
+      // element.addEventListener('transitionend', () => {
+      //   element.style.transitionDuration = ''
+      //   element.style.transitionProperty = ''
+      // }, { once: true })
 
       offsets[side] += 1
     }
@@ -101,11 +113,10 @@ export function useStacks(
     updateDrawerOffsets()
   }
 
-  onMounted(() => {
-    drawerWrapperRef.value = document.querySelector('[data-vaul-drawer-wrapper]') as HTMLElement | undefined
-  })
+  watch(() => toValue(inProgress), (_inProgress) => {
+    if (_inProgress)
+      return
 
-  watch(() => toValue(inProgress), () => {
     if (drawerWrapperRef.value) {
       drawerWrapperRef.value.style.transitionDuration = ''
     }

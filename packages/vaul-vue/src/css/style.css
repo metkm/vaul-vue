@@ -6,6 +6,6 @@
 
 body {
   transition-property: background-color;
-  transition-duration: 500ms;
-  transition-timing-function: var(--default-transition-timing-function);
+  transition-duration: var(--vaul-duration);
+  transition-timing-function: var(--vaul-easing);
 }
