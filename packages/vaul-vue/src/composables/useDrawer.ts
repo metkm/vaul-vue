@@ -243,12 +243,6 @@ export function useDrawer(
     inProgress.value = true
   })
 
-  watch(inProgress, () => {
-    if (contentElement.value) {
-      contentElement.value.style.transitionDuration = ''
-    }
-  })
-
   return {
     onDragStart,
     onDrag,
