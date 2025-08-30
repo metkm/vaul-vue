@@ -16,7 +16,7 @@ defineProps<{
 </script>
 
 <template>
-  <DrawerRoot v-slot="{ open, close }">
+  <DrawerRoot v-slot="{ open, close, closestSnapPoint }">
     <DrawerTrigger
       v-if="!!$slots.default"
       data-testid="trigger"
@@ -41,7 +41,12 @@ defineProps<{
         </DrawerHandle>
 
         <div v-if="!!$slots.content" class="h-full grid place-content-center gap-4 p-4">
-          <slot name="content" :open="open" :close="close" />
+          <slot
+            name="content"
+            :open="open"
+            :close="close"
+            :closest-snap-point="closestSnapPoint"
+          />
         </div>
       </DrawerContent>
     </DrawerPortal>

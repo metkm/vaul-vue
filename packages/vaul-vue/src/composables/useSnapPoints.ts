@@ -55,7 +55,7 @@ export function useSnapPoints({
       return true
     }
 
-    return modelValueSnapIndex.value === points.value[points.value.length - 1]
+    return points.value[modelValueSnapIndex.value] === points.value[points.value.length - 1]
   })
 
   const shouldDismiss = computed(() => {

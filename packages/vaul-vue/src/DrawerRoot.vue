@@ -83,6 +83,7 @@ provideDrawerRootContext({
     <slot
       :open="open"
       :close="close"
+      :closest-snap-point="drawerContext.closestSnapPoint"
     />
   </DialogRoot>
 </template>

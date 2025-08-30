@@ -34,5 +34,3 @@ const snapIndex = ref(0)
     </DemoDrawer>
   </div>
 </template>
-
-<style scoped></style>

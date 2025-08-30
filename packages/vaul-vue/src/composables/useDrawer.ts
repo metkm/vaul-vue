@@ -86,6 +86,7 @@ export function useDrawer(
     activeSnapPointOffset,
     isSnappedToLastPoint,
     shouldDismiss,
+    closestSnapPoint,
   } = useSnapPoints({
     snapPoints: props.snapPoints,
     contentSize,
@@ -255,6 +256,7 @@ export function useDrawer(
     initialContainerStyle,
     shouldMount,
     activeSnapPointOffset,
+    closestSnapPoint,
     handleOnly: toValue(props.handleOnly),
     dismissible: toValue(props.dismissible),
     keepMounted: toValue(props.keepMounted),
