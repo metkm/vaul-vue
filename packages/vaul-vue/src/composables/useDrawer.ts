@@ -82,9 +82,8 @@ export function useDrawer(
   } = useScroll(shouldMount)
 
   const {
-    currentSnapOffset,
+    points,
     activeSnapPointOffset,
-    isPassingLastPoint,
     shouldDismiss,
     closestSnapPointIndex,
   } = useSnapPoints({
@@ -121,7 +120,7 @@ export function useDrawer(
       }
 
       if (modelValueOpen.value && animateIn.value) {
-        return currentSnapOffset.value * sideOffsetModifier.value
+        return activeSnapPointOffset.value * sideOffsetModifier.value
       }
 
       return closeOffset
@@ -166,18 +165,30 @@ export function useDrawer(
       return
 
     const clientPosition = isVertical.value ? event.clientY : event.clientX
-    let dragDistance = pointerStart.value - clientPosition + startScroll.value
+
+    const dragDistance = pointerStart.value - clientPosition + startScroll.value
     const movingDirectionDrawerWantsToGo = dragDistance * sideOffsetModifier.value > 0
 
     isDragging.value = handleScroll(event, movingDirectionDrawerWantsToGo, props.side)
     if (!isDragging.value)
       return
 
-    if (isPassingLastPoint.value && movingDirectionDrawerWantsToGo) {
-      dragDistance = dampen(Math.abs(dragDistance)) * sideOffsetModifier.value
+    let newOffset = activeSnapPointOffset.value * sideOffsetModifier.value + -dragDistance
+
+    if ((newOffset * sideOffsetModifier.value) <= 0)
+      return
+
+    const lastPointOffset = points.value[points.value.length - 1] * windowSize.value
+    const drawerVisibleSize = windowSize.value - Math.abs(newOffset)
+
+    if (drawerVisibleSize > lastPointOffset) {
+      const difference = drawerVisibleSize - lastPointOffset // difference between the drawer position and last point offset
+  
+      newOffset += difference * sideOffsetModifier.value // delete the difference after drawer passes last point offset
+      newOffset += -dampen(Math.abs(difference)) * sideOffsetModifier.value // now that we can't pass last point offset, add dampened value to overextend little bit
     }
 
-    offset.value = activeSnapPointOffset.value * sideOffsetModifier.value + -dragDistance
+    offset.value = newOffset
     emit('drag', offset.value)
   }
 

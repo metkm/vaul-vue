@@ -22,10 +22,10 @@ export function useSnapPoints({
   )
 
   const points = computed(() => {
-    const _contentSize = toValue(contentSize)
     const _snapPoints = toValue(snapPoints)
 
     if (_snapPoints.length < 1) {
+      const _contentSize = toValue(contentSize)
       return [toValue(_contentSize) / toValue(windowSize)]
     }
 
@@ -33,10 +33,10 @@ export function useSnapPoints({
   })
 
   const closestSnapPoint = computed(() => {
-    const _p = toValue(points)
+    const _points = toValue(points)
 
-    if (_p.length <= 1)
-      return _p[0]
+    if (_points.length <= 1)
+      return _points[0]
 
     const offsetNormalized = drawerVisibleSize.value / toValue(windowSize)
 
@@ -48,20 +48,6 @@ export function useSnapPoints({
   )
 
   const activeSnapPointOffset = computed(() => {
-    const wSize = toValue(windowSize)
-    return wSize - (wSize * points.value[modelValueSnapIndex.value])
-  })
-
-  const shouldDismiss = computed(() => {
-    const div = 2
-    const wSize = toValue(windowSize)
-
-    const smallestPoint = points.value[0] / div
-
-    return drawerVisibleSize.value < wSize * smallestPoint
-  })
-
-  const currentSnapOffset = computed(() => {
     const point = points.value[modelValueSnapIndex.value]
 
     if (point === undefined) {
@@ -73,12 +59,13 @@ export function useSnapPoints({
     return wSize - (wSize * point)
   })
 
-  const isPassingLastPoint = computed(() => {
-    if (points.value.length <= 1) {
-      return true
-    }
+  const shouldDismiss = computed(() => {
+    const div = 2
+    const wSize = toValue(windowSize)
 
-    return modelValueSnapIndex.value >= points.value.length - 1
+    const smallestPoint = points.value[0] / div
+
+    return drawerVisibleSize.value < wSize * smallestPoint
   })
 
   return {
@@ -86,7 +73,6 @@ export function useSnapPoints({
     activeSnapPointOffset,
     closestSnapPointIndex,
     shouldDismiss,
-    isPassingLastPoint,
-    currentSnapOffset,
+    drawerVisibleSize,
   }
 }
