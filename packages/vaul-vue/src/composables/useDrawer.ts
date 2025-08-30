@@ -84,9 +84,9 @@ export function useDrawer(
   const {
     currentSnapOffset,
     activeSnapPointOffset,
-    isSnappedToLastPoint,
+    isPassingLastPoint,
     shouldDismiss,
-    closestSnapPoint,
+    closestSnapPointIndex,
   } = useSnapPoints({
     snapPoints: props.snapPoints,
     contentSize,
@@ -173,7 +173,7 @@ export function useDrawer(
     if (!isDragging.value)
       return
 
-    if (isSnappedToLastPoint.value && movingDirectionDrawerWantsToGo) {
+    if (isPassingLastPoint.value && movingDirectionDrawerWantsToGo) {
       dragDistance = dampen(Math.abs(dragDistance)) * sideOffsetModifier.value
     }
 
@@ -195,6 +195,7 @@ export function useDrawer(
       return
     }
 
+    modelValueSnapIndex.value = closestSnapPointIndex.value
     handleScrollEnd()
   }
 
@@ -256,7 +257,6 @@ export function useDrawer(
     initialContainerStyle,
     shouldMount,
     activeSnapPointOffset,
-    closestSnapPoint,
     handleOnly: toValue(props.handleOnly),
     dismissible: toValue(props.dismissible),
     keepMounted: toValue(props.keepMounted),

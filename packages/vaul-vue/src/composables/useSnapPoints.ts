@@ -1,6 +1,6 @@
 import type { MaybeRefOrGetter, ModelRef } from 'vue'
 import { computed, toValue } from 'vue'
-import { getClosestNumber, range } from '../utils'
+import { getClosestNumber } from '../utils'
 
 export interface useSnapPointsProps {
   snapPoints: MaybeRefOrGetter<number[]>
@@ -17,12 +17,16 @@ export function useSnapPoints({
   offset,
   modelValueSnapIndex,
 }: useSnapPointsProps) {
+  const drawerVisibleSize = computed(
+    () => toValue(windowSize) - Math.abs(toValue(offset)),
+  )
+
   const points = computed(() => {
     const _contentSize = toValue(contentSize)
     const _snapPoints = toValue(snapPoints)
 
     if (_snapPoints.length < 1) {
-      return [range(0, toValue(windowSize), 0, 1, _contentSize)]
+      return [toValue(_contentSize) / toValue(windowSize)]
     }
 
     return _snapPoints.sort()
@@ -34,8 +38,7 @@ export function useSnapPoints({
     if (_p.length <= 1)
       return _p[0]
 
-    // change offset to positive number to check against offset points.
-    const offsetNormalized = range(0, toValue(windowSize), 1, 0, Math.abs(toValue(offset)))
+    const offsetNormalized = drawerVisibleSize.value / toValue(windowSize)
 
     return getClosestNumber(points.value, offsetNormalized)
   })
@@ -46,16 +49,7 @@ export function useSnapPoints({
 
   const activeSnapPointOffset = computed(() => {
     const wSize = toValue(windowSize)
-
-    return wSize - (toValue(windowSize) * points.value[modelValueSnapIndex.value])
-  })
-
-  const isSnappedToLastPoint = computed(() => {
-    if (points.value.length <= 1) {
-      return true
-    }
-
-    return points.value[modelValueSnapIndex.value] === points.value[points.value.length - 1]
+    return wSize - (wSize * points.value[modelValueSnapIndex.value])
   })
 
   const shouldDismiss = computed(() => {
@@ -63,9 +57,8 @@ export function useSnapPoints({
     const wSize = toValue(windowSize)
 
     const smallestPoint = points.value[0] / div
-    const drawerVisible = wSize - Math.abs(toValue(offset))
 
-    return drawerVisible < wSize * smallestPoint
+    return drawerVisibleSize.value < wSize * smallestPoint
   })
 
   const currentSnapOffset = computed(() => {
@@ -80,13 +73,20 @@ export function useSnapPoints({
     return wSize - (wSize * point)
   })
 
+  const isPassingLastPoint = computed(() => {
+    if (points.value.length <= 1) {
+      return true
+    }
+
+    return modelValueSnapIndex.value >= points.value.length - 1
+  })
+
   return {
     points,
     activeSnapPointOffset,
-    closestSnapPoint,
     closestSnapPointIndex,
     shouldDismiss,
-    isSnappedToLastPoint,
+    isPassingLastPoint,
     currentSnapOffset,
   }
 }
