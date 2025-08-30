@@ -201,6 +201,7 @@ export function useDrawer(
     if (!contentElement.value || !props.scaleBackground)
       return
 
+    inProgress.value = true
     updateDepths(offsetInitial.value)
   }, {
     flush: 'post',
@@ -225,7 +226,6 @@ export function useDrawer(
 
       emit('open')
       await nextTick()
-
 
       if (contentElement.value) {
         addStack(contentElement.value)

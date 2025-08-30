@@ -26,6 +26,10 @@ const snapIndex = ref(0)
         <VButton data-testid="change-snap-index" @click="snapIndex = 1">
           Change snap index to 1
         </VButton>
+
+        <VButton @click="snapIndex = 0">
+          Change snap index to 0
+        </VButton>
       </template>
     </DemoDrawer>
   </div>
